@@ -8,7 +8,7 @@
 static PluginMenu   menu;
 static Handle       thread;
 static Handle       onProcessExitEvent, resumeExitEvent;
-static u8           stack[STACK_SIZE] ALIGN(8);
+static u8           stack[STACK_SIZE] __attribute__((aligned(8)));
 
 void     Flash(u32 color)
 {
@@ -74,14 +74,8 @@ void    ThreadMain(void *arg)
     // Plugin main loop
     while (1)
     {
-        if (svcWaitSynchronization(onProcessExitEvent, 1000000) != 0x09401BFE)
-        {
-            // If we didn't timeout, then the process is exiting
-            goto exit;
-        }
-
         // Check keys, display the menu if necessary
-        if (HID_PAD & BUTTON_SELECT)
+        // if (HID_PAD & BUTTON_SELECT)
             PLGLDR__DisplayMenu(&menu);
 
         // Apply enabled cheat
@@ -93,9 +87,6 @@ exit:
     // useful to save config, properly deinit stuff etc
     plgLdrExit();
     srvExit();
-
-    // We're done with our exit code, so we let the game exit
-    svcSignalEvent(resumeExitEvent);
 
     svcExitThread();
 }
@@ -123,9 +114,6 @@ void    main(void)
 {
     PluginHeader *header = (PluginHeader *)0x07000000;
 
-    if (header->magic != HeaderMagic)
-        return; ///< Abort plugin as something went wrong
-
     // Init heap
     __system_allocateHeaps(header);
 
@@ -133,9 +121,8 @@ void    main(void)
     srvInit();
     plgLdrInit();
 
-    // Get the event triggered  when the game will exit
-    svcControlProcess(CUR_PROCESS_HANDLE, PROCESSOP_GET_ON_EXIT_EVENT, (u32)&onProcessExitEvent, (u32)&resumeExitEvent);
-
     // Create the plugin's main thread
-    svcCreateThread(&thread, ThreadMain, 0, (u32 *)(stack + STACK_SIZE), 30, -1);
+    svcCreateThread(&thread, ThreadMain, 0, (u32 *)(stack + STACK_SIZE), 0x1A, 0);
+
+    svcInvalidateEntireInstructionCache();
 }

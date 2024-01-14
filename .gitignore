@@ -1,2 +1,4 @@
 /build
 *.3gx
+.vscode
+JMdict_e.xml
