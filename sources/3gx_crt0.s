@@ -6,7 +6,7 @@
 
 @---------------------------------------------------------------------------------
     .section ".crt0"
-    .global _start, __service_ptr
+    .global _start, __service_ptr, __system_runflags, __apt_appid
 @---------------------------------------------------------------------------------
     .align 4
     .arm
@@ -32,7 +32,10 @@ startup:
 
     @ Jump back to plugin loader hook
     mov     pc, r4
-
+__system_runflags:
+	.word 0 @ Flags to signal runtime restrictions to ctrulib
+__apt_appid:
+	.word 0x300 @ Program APPID
 @---------------------------------------------------------------------------------
 @ Clear memory to 0x00 if length != 0
 @  r0 = Start Address

@@ -4,82 +4,23 @@
 #include "plgldr.h"
 #include "csvc.h"
 #include "common.h"
+#include "draw.h"
 
 static PluginMenu   menu;
 static Handle       thread;
 static Handle       onProcessExitEvent, resumeExitEvent;
-static u8           stack[STACK_SIZE] __attribute__((aligned(8)));
-
-void     Flash(u32 color)
-{
-    color |= 0x01000000;
-    for (u32 i = 0; i < 64; i++)
-    {
-        REG32(0x10202204) = color;
-        svcSleepThread(5000000);
-    }
-    REG32(0x10202204) = 0;
-}
-
-// Add an entry in the menu
-void    NewEntry(const char *name, const char *hint)
-{
-    if (menu.nbItems >= MAX_ITEMS_COUNT)
-        return;
-
-    u32 index = menu.nbItems;
-
-    menu.states[index] = 0;
-    if (name)
-        strncpy(menu.items[index], name, MAX_BUFFER);
-    if (hint)
-        strncpy(menu.hints[index], hint, MAX_BUFFER);
-    ++menu.nbItems;
-}
-
-// Create the menu
-void    InitMenu(void)
-{
-    memset(&menu, 0, sizeof(menu));
-
-    strncpy(menu.title, "Sample plugin", MAX_BUFFER);
-
-    NewEntry("Flash green - L", "Press L to get a green flash");
-    NewEntry("Flash red - Left", "Press Left to get a red flash");
-    NewEntry("Flash blue - Right", "Press Right to get a blue flash");
-
-    for (u32 i = 0; i < 25; ++i)
-    {
-        char buffer[50];
-
-        sprintf(buffer, "Sample cheat #%d", i);
-        NewEntry(buffer, NULL);
-    }
-}
-
-// Apply enabled cheat
-void    ApplyCheat(void)
-{
-    if (menu.states[0] && HID_PAD & BUTTON_L1) Flash(0x00FF00);
-    if (menu.states[1] && HID_PAD & BUTTON_LEFT) Flash(0x0000FF);
-    if (menu.states[2] && HID_PAD & BUTTON_RIGHT) Flash(0xFF0000);
-}
+static u8           stack[STACK_SIZE] CTR_ALIGN(8);
 
 // Plugin main thread entrypoint
 void    ThreadMain(void *arg)
 {
-    // Init our menu
-    InitMenu();
-
     // Plugin main loop
     while (1)
     {
-        // Check keys, display the menu if necessary
-        // if (HID_PAD & BUTTON_SELECT)
-            PLGLDR__DisplayMenu(&menu);
-
-        // Apply enabled cheat
-        ApplyCheat();
+        if (HID_PAD & BUTTON_SELECT)
+            PLGLDR__DisplayMessage(">", "わりやまはなたさかあ\nをりゆみひにちしさい\nんるよむふめつすくう\n゛れ！めへねてせけえ\n゜ろ？もほのとぞこお");
+        Draw_DrawString(10, 10, COLOR_TITLE, "dank");
+        svcSleepThread(50000000);
     }
 
 exit:
@@ -120,6 +61,32 @@ void    main(void)
     // Init services
     srvInit();
     plgLdrInit();
+
+    // Result rc = romfsInit();
+    // if (rc)
+    //     printf("romfsInit: %08lX\n", rc);
+    // else
+    // {
+    //     FILE* f = fopen(path, "romfs:/jishou/JMdict_smol.txt");
+    //     if (f)
+    //     {
+    //         char mystring[100];
+    //         while (fgets(mystring, sizeof(mystring), f))
+    //         {
+    //             int a = strlen(mystring);
+    //             if (mystring[a-1] == '\n')
+    //             {
+    //             mystring[a-1] = 0;
+    //             if (mystring[a-2] == '\r')
+    //             mystring[a-2] = 0;
+    //             }
+    //             puts(mystring);
+    //             }
+    //             printf(">>EOF<<\n");
+    //             fclose(f);
+    //         }
+    // }
+    // romfsExit();
 
     // Create the plugin's main thread
     svcCreateThread(&thread, ThreadMain, 0, (u32 *)(stack + STACK_SIZE), 0x1A, 0);
