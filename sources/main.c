@@ -4,7 +4,6 @@
 #include "plgldr.h"
 #include "csvc.h"
 #include "common.h"
-#include "draw.h"
 
 static PluginMenu   menu;
 static Handle       thread;
@@ -19,7 +18,6 @@ void    ThreadMain(void *arg)
     {
         if (HID_PAD & BUTTON_SELECT)
             PLGLDR__DisplayMessage(">", "わりやまはなたさかあ\nをりゆみひにちしさい\nんるよむふめつすくう\n゛れ！めへねてせけえ\n゜ろ？もほのとぞこお");
-        Draw_DrawString(10, 10, COLOR_TITLE, "dank");
         svcSleepThread(50000000);
     }
 
