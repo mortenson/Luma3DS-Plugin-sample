@@ -5,10 +5,8 @@
 #include "csvc.h"
 #include "common.h"
 
-static PluginMenu   menu;
 static Handle       thread;
-static Handle       onProcessExitEvent, resumeExitEvent;
-static u8           stack[STACK_SIZE] CTR_ALIGN(8);
+static u8           stack[STACK_SIZE] __attribute__((aligned(8)));
 
 // Plugin main thread entrypoint
 void    ThreadMain(void *arg)
@@ -16,9 +14,7 @@ void    ThreadMain(void *arg)
     // Plugin main loop
     while (1)
     {
-        if (HID_PAD & BUTTON_SELECT)
-            PLGLDR__DisplayMessage(">", "わりやまはなたさかあ\nをりゆみひにちしさい\nんるよむふめつすくう\n゛れ！めへねてせけえ\n゜ろ？もほのとぞこお");
-        svcSleepThread(50000000);
+        svcSleepThread(5000000);
     }
 
 exit:
@@ -59,32 +55,6 @@ void    main(void)
     // Init services
     srvInit();
     plgLdrInit();
-
-    // Result rc = romfsInit();
-    // if (rc)
-    //     printf("romfsInit: %08lX\n", rc);
-    // else
-    // {
-    //     FILE* f = fopen(path, "romfs:/jishou/JMdict_smol.txt");
-    //     if (f)
-    //     {
-    //         char mystring[100];
-    //         while (fgets(mystring, sizeof(mystring), f))
-    //         {
-    //             int a = strlen(mystring);
-    //             if (mystring[a-1] == '\n')
-    //             {
-    //             mystring[a-1] = 0;
-    //             if (mystring[a-2] == '\r')
-    //             mystring[a-2] = 0;
-    //             }
-    //             puts(mystring);
-    //             }
-    //             printf(">>EOF<<\n");
-    //             fclose(f);
-    //         }
-    // }
-    // romfsExit();
 
     // Create the plugin's main thread
     svcCreateThread(&thread, ThreadMain, 0, (u32 *)(stack + STACK_SIZE), 0x1A, 0);

@@ -141,16 +141,6 @@ Result  PLGLDR__DisplayMenu(PluginMenu *menu)
     return res;
 }
 
-int u8strlen(const char *s)
-{
-  int len=0;
-  while (*s) {
-    if ((*s & 0xC0) != 0x80) len++ ;
-    s++;
-  }
-  return len;
-}
-
 Result  PLGLDR__DisplayMessage(const char *title, const char *body)
 {
     Result res = 0;
