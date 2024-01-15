@@ -4,6 +4,7 @@
 #include "plgldr.h"
 #include "csvc.h"
 #include "common.h"
+#include "draw.h"
 
 static Handle       thread;
 static u8           stack[STACK_SIZE] __attribute__((aligned(8)));
@@ -11,10 +12,27 @@ static u8           stack[STACK_SIZE] __attribute__((aligned(8)));
 // Plugin main thread entrypoint
 void    ThreadMain(void *arg)
 {
+    // Draw_Init();
+    // Draw_Lock();
+    // Draw_AllocateFramebufferCache(FB_BOTTOM_SIZE);
+    // Draw_SetupFramebuffer();
+    // Draw_ClearFramebuffer();
+    // Draw_FlushFramebuffer();
+    // Draw_Unlock();
+
+    // svcSleepThread(5000000000);
+
     // Plugin main loop
     while (1)
     {
-        svcSleepThread(5000000);
+        // if (HID_PAD & BUTTON_SELECT) {
+        // Draw_Lock();
+        u16 *const fb = (u16 *)FB_BOTTOM_VRAM_ADDR;
+        Draw_DrawString(0, 0, COLOR_WHITE, "Hello world you dumb pieces of shit");
+        // Draw_Unlock();
+        // }
+        // PLGLDR__DisplayMessage("fuck", "さ");
+        // svcSleepThread(5000000);
     }
 
 exit:
