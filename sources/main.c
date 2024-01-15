@@ -5,34 +5,38 @@
 #include "csvc.h"
 #include "common.h"
 #include "draw.h"
+#include "hid.h"
 
 static Handle       thread;
 static u8           stack[STACK_SIZE] __attribute__((aligned(8)));
 
+// libctru redefinition:
+
+bool hidShouldUseIrrst(void)
+{
+    // ir:rst exposes only two sessions :(
+    return false;
+}
+
 // Plugin main thread entrypoint
 void    ThreadMain(void *arg)
 {
-    // Draw_Init();
-    // Draw_Lock();
-    // Draw_AllocateFramebufferCache(FB_BOTTOM_SIZE);
-    // Draw_SetupFramebuffer();
-    // Draw_ClearFramebuffer();
-    // Draw_FlushFramebuffer();
-    // Draw_Unlock();
-
-    // svcSleepThread(5000000000);
-
-    // Plugin main loop
     while (1)
     {
-        // if (HID_PAD & BUTTON_SELECT) {
-        // Draw_Lock();
-        u16 *const fb = (u16 *)FB_BOTTOM_VRAM_ADDR;
-        Draw_DrawString(0, 0, COLOR_WHITE, "Hello world you dumb pieces of shit");
-        // Draw_Unlock();
-        // }
-        // PLGLDR__DisplayMessage("fuck", "さ");
-        // svcSleepThread(5000000);
+        svcSleepThread(5000000);
+        hidScanInput();
+        u32 kHeld = hidKeysHeld();
+        u32 kUp = hidKeysUp();
+        u32 kDown = hidKeysDown();
+        if ((kHeld & KEY_A) == KEY_A || (kUp & KEY_A) == KEY_A || (kDown & KEY_A) == KEY_A) {
+            while (1) {
+                u16 *const fb = (u16 *)FB_BOTTOM_VRAM_ADDR;
+                int i;
+                for (i = 0; i < FB_BOTTOM_SIZE; i++) {
+                    fb[i] = COLOR_GREEN;
+                }
+            }
+        }
     }
 
 exit:
